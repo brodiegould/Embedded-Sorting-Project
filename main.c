@@ -15,19 +15,19 @@
 
 /* Global Variables */
 volatile char STATE;
-volatile unsigned char pauseButton   = 1;										// variable to treat the ESTOP like a pause button for purposes of running
+volatile unsigned char pauseButton   = 1;					// variable to treat the ESTOP like a pause button for purposes of running
 
 /* DC motor belt variables */
-volatile unsigned char dcBeltBrake    =  0b11111111;							// bits that correspond to DC motor brake using VCC only, not GND
-volatile unsigned char dcBeltBwd      =  0b10001101;							// bits that correspond to DC motor rotating forwards
-volatile unsigned char dcBeltFwd	  =  0b10001110;							// bits that correspond to DC motor rotating backwards
-volatile unsigned char motorDirection =  0b10001101;							// initialize the current belt motor direction to forwards
+volatile unsigned char dcBeltBrake    =  0b11111111;				// bits that correspond to DC motor brake using VCC only, not GND
+volatile unsigned char dcBeltBwd      =  0b10001101;				// bits that correspond to DC motor rotating forwards
+volatile unsigned char dcBeltFwd      =  0b10001110;				// bits that correspond to DC motor rotating backwards
+volatile unsigned char motorDirection =  0b10001101;				// initialize the current belt motor direction to forwards
 
 /* turntable stepper variables */
 int stepRotation[4] =  {0b00110110, 0b00101110, 0b00101101, 0b00110101};		// create array with 4 different PWM steps, pulses two poles at once
-volatile int stepCounter =0;													// step counter varies from 0->3 
-volatile int turntableSteps		 = 0;											// set variable to store the state of the current step
-volatile unsigned char dutyCycle = 0xC0;										// set PWM. Alternative values are(50%=0x80, 60%=9A, 65%=41 70%=B4,75%=C0 80%=CD, 85%=D8,90%=E6,95%=F0, 100%==FF)	
+volatile int stepCounter =0;								// step counter varies from 0->3 
+volatile int turntableSteps		 = 0;						// set variable to store the state of the current step
+volatile unsigned char dutyCycle = 0xC0;						// set PWM. Alternative values are(50%=0x80, 60%=9A, 65%=41 70%=B4,75%=C0 80%=CD, 85%=D8,90%=E6,95%=F0, 100%==FF)	
 
 // global variables to use for the linked list
 #define CW 1
@@ -51,10 +51,10 @@ const float accProfile100[100] = {149.72,148.08,146.22,144.11,141.76,139.14,136.
 
 // reflective sensor RL
 volatile unsigned int  ADC_RESULT_FLAG;
-volatile unsigned int  ADC_RESULT =2000;			//set the ADC result to some arbitrarily large number to start
+volatile unsigned int  ADC_RESULT =2000;	//set the ADC result to some arbitrarily large number to start
 
 // Hall Effect sensor HE in turntable 
-volatile unsigned int STAGE_4_HE_FLAG = 0;			// Hall Effect sensor flag to indicate table position for table initialization
+volatile unsigned int STAGE_4_HE_FLAG = 0;	// Hall Effect sensor flag to indicate table position for table initialization
 
 // count variables for each part (on screen A, S, W, B)
 volatile unsigned int aluminumCount = 0;
@@ -68,7 +68,7 @@ volatile unsigned int pausesteelCount	= 0;
 volatile unsigned int pausewhiteCount	= 0;
 volatile unsigned int pauseblackCount	= 0;
 volatile unsigned int totalCount    = 0;
-volatile unsigned int onBelt = 0;					// variable used to track values still in the linked list, not yet sorted
+volatile unsigned int onBelt = 0;		// variable used to track values still in the linked list, not yet sorted
 
 // size of linked list variable
 int sizeOfList = 0;
@@ -98,30 +98,30 @@ int classifyPart(int ADC_RESULT);
 
 
 int main(int argc, char *argv[]){
-	CLKPR = 0x80;						// allow cpu clock to be adjusted
-	CLKPR = 0x01;						// sets system clock to 8MHz clk/2
-	STATE = 0;							// ready to poll
+	CLKPR = 0x80;				// allow cpu clock to be adjusted
+	CLKPR = 0x01;				// sets system clock to 8MHz clk/2
+	STATE = 0;				// ready to poll
     
     // LCD initialization and get port readouts. note its a 16W * 2H display
     InitLCD(LS_BLINK|LS_ULINE);			// initialize LCD module
-    LCDClear();							// cler display
+    LCDClear();					// cler display
 
     /*FIFO Function*/
-    link *head;							// The ptr to the head of the queue 
-    link *tail;							// The ptr to the tail of the queue 
-    link *newLink;						// A ptr to a link aggregate data type (struct) 
-    link *rtnLink;						// same as the above 
+    link *head;					// The ptr to the head of the queue 
+    link *tail;					// The ptr to the tail of the queue 
+    link *newLink;				// A ptr to a link aggregate data type (struct) 
+    link *rtnLink;				// same as the above 
     rtnLink = NULL;
     newLink = NULL;
     setup(&head, &tail);
     /*END FIFO Function*/
 
-	cli();								// Disables all interrupts 
-	generalConfig();					// initialize port settings, interrupt settings, and ADC settings   
-	pwmConfig(dutyCycle);				// initialize the PWM to the duty cycle set in the global variable declarations
-	sei();								// Global Enable for all interrupts
-	stepperHome();						// get stepper homed at position BLACKPLASTIC
-    DCMotorControl(dcBeltFwd);		    // start belt in forward direction
+	cli();					// Disables all interrupts 
+	generalConfig();			// initialize port settings, interrupt settings, and ADC settings   
+	pwmConfig(dutyCycle);			// initialize the PWM to the duty cycle set in the global variable declarations
+	sei();					// Global Enable for all interrupts
+	stepperHome();				// get stepper homed at position BLACKPLASTIC
+    DCMotorControl(dcBeltFwd);		    	// start belt in forward direction
     
 		goto POLLING_STAGE;
 
@@ -151,19 +151,19 @@ int main(int argc, char *argv[]){
 		}//switch STATE
 	
 		PAUSE: //State 1
-			DCMotorControl(dcBeltBrake);					// stop belt
+			DCMotorControl(dcBeltBrake);			// stop belt
 			
-			onBelt = size(&head, &tail);					// determine size of linked list
-			pauseblackCount = blackCount;					// pass total count values to the pause state values
+			onBelt = size(&head, &tail);			// determine size of linked list
+			pauseblackCount = blackCount;			// pass total count values to the pause state values
 			pausewhiteCount = whiteCount;
 			pausesteelCount = steelCount;
 			pausealuminumCount = aluminumCount;
 			
-			for (int j = 0; j<onBelt; j++){					// loop through items in the linked list
+			for (int j = 0; j<onBelt; j++){			// loop through items in the linked list
 				int listHead;
-				listHead = head->e.itemCode;				// peak at head of linked list
-				head = head->next; // go to next list item
-				if (listHead == BLK){						// remove that item from the sorted list, as it's still on the belt
+				listHead = head->e.itemCode;		// peak at head of linked list
+				head = head->next; 			// go to next list item
+				if (listHead == BLK){			// remove that item from the sorted list, as it's still on the belt
 					pauseblackCount--;						
 				} else if(listHead == WHT){
 					pausewhiteCount--;
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]){
 				} 
 			}// end for
 
-			LCDWriteStringXY(0,0,"S:");							// print off the current count
+			LCDWriteStringXY(0,0,"S:");			// print off the current count
 			LCDWriteIntXY(2,0,pausesteelCount,2);
 			LCDWriteStringXY(4,0,"A:");
 			LCDWriteIntXY(6,0,pausealuminumCount,2);
@@ -184,46 +184,46 @@ int main(int argc, char *argv[]){
 			LCDWriteStringXY(12,0,"B:");
 			LCDWriteIntXY(14,0,pauseblackCount,2);
 			
-			LCDWriteStringXY(0,1,"ON BELT:");					// print off the current size of the linked list (unsorted pieces)
+			LCDWriteStringXY(0,1,"ON BELT:");		// print off the current size of the linked list (unsorted pieces)
 			LCDWriteIntXY(9,1,onBelt,1);
 			
-		    while(pauseButton == 0);                            // wait to reset
-		    ADC_RESULT =2000;									// set ADC result high so it reads properly after pausing 
-            DCMotorControl(dcBeltFwd);                          // restart belt
+		    while(pauseButton == 0);                           // wait to reset
+		    ADC_RESULT =2000;					// set ADC result high so it reads properly after pausing 
+            DCMotorControl(dcBeltFwd);                          	// restart belt
 			
-		    STATE = 0;											// back to polling, restart belt
+		    STATE = 0;						// back to polling, restart belt
 		goto POLLING_STAGE;
 
 		REFLECTIVE_STAGE: // State 2
 		// logic for characterizing the item and storing it in the linked list
-			initLink(&newLink);									// initialize new link connection
-			newLink->e.itemCode = (classifyPart(ADC_RESULT));	// classify item and put value into itemCode
-			enqueue(&head, &tail, &newLink);					// take data and create new link
-			// LCDWriteIntXY(0,1,ADC_RESULT,4);					// ADC READOUT VALUES FOR TESTING
+			initLink(&newLink);						// initialize new link connection
+			newLink->e.itemCode = (classifyPart(ADC_RESULT));		// classify item and put value into itemCode
+			enqueue(&head, &tail, &newLink);				// take data and create new link
+			// LCDWriteIntXY(0,1,ADC_RESULT,4);				// ADC READOUT VALUES FOR TESTING
 			 //LCDWriteStringXY(7,1,"<-ADC VAL");				// ADC READOUT VALUES FOR TESTING
-			ADC_RESULT=2000;									// use some arbitrarily large number to reset the ADC high
+			ADC_RESULT=2000;						// use some arbitrarily large number to reset the ADC high
 		
-		STATE = 0;			// reset state once part is done being classified	
+		STATE = 0;								// reset state once part is done being classified	
 		goto POLLING_STAGE;
 
     
 		SORTING_STAGE:	//State 3
 		// belt needs to slow, turntable needs to move to correct position, and belt needs to feed the part in
-			DCMotorControl(dcBeltBrake);						// stop the belt						
-			sortStepper(tablePosition, head->e.itemCode);		// call sorting function with current list head, and previous list head						 
-			dequeue(&tail, &head, &rtnLink);					// remove link @ head of linked list
-			free(rtnLink);										// free up memory after removing list item
-			DCMotorControl(dcBeltFwd);							// restart belt in forward direction
+			DCMotorControl(dcBeltBrake);					// stop the belt						
+			sortStepper(tablePosition, head->e.itemCode);			// call sorting function with current list head, and previous list head						 
+			dequeue(&tail, &head, &rtnLink);				// remove link @ head of linked list
+			free(rtnLink);							// free up memory after removing list item
+			DCMotorControl(dcBeltFwd);					// restart belt in forward direction
 			
 		STATE = 0;		// go back to POLLING_STAGE
 		goto POLLING_STAGE;
 		
 		RAMP_DOWN: // State 4
 		// process the remaining parts on the belt, then readout the total count of parts
-			cli();												// disable all interrupts
-			DCMotorControl(dcBeltBrake);						// stop the belt
+			cli();						// disable all interrupts
+			DCMotorControl(dcBeltBrake);			// stop the belt
 			LCDClear();
-			LCDWriteStringXY(0,0,"S:");							// print count of all sorted items
+			LCDWriteStringXY(0,0,"S:");			// print count of all sorted items
 			LCDWriteIntXY(2,0,steelCount,2);
 			LCDWriteStringXY(4,0,"A:");
 			LCDWriteIntXY(6,0,aluminumCount,2);
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]){
 			LCDWriteIntXY(14,0,blackCount,2);
 			
 
-			onBelt = size(&head, &tail);						// calculate sizeof list, return size as an int
+			onBelt = size(&head, &tail);			// calculate sizeof list, return size as an int
 			LCDWriteStringXY(0,1,"ON BELT:");
 			LCDWriteIntXY(10,1,onBelt,1);
 				
@@ -243,23 +243,23 @@ int main(int argc, char *argv[]){
 				
 		END: // State 5
 		// Stop everything here...'MAKE SAFE'
-			PORTC = 0xFF;										// all red LED's to indicate program ended
+			PORTC = 0xFF;					// all red LED's to indicate program ended
 		
 		STATE = 5;
-		return(0);												// end 
+		return(0);						// end 
 }
 
 // ISR0 for exit optical sensor, EX, uses PD0, pin21
 // exit optical sensor is active low
 ISR(INT0_vect){	
-      if((PIND &0b00000001) == 0b00000000){						// initial compare statement to detect input
-   		  STATE = 3;											// go to SORTING State		 
+      if((PIND &0b00000001) == 0b00000000){				// initial compare statement to detect input
+   		  STATE = 3;						// go to SORTING State		 
 	  }
 }
 // ISR1 for entry optical sensor, OR. uses PD1, pin 20
 ISR(INT1_vect){
-   if ((PIND & 0x02) == 0x02){									// if sensor is detecting a part    
-		 ADCSRA |= _BV(ADSC);									// start single ADC conversion
+   if ((PIND & 0x02) == 0x02){						// if sensor is detecting a part    
+		 ADCSRA |= _BV(ADSC);					// start single ADC conversion
     }
 }
 
@@ -267,12 +267,12 @@ ISR(INT1_vect){
 // ISR for generating an PAUSE condition
 ISR(INT2_vect){
        //PAUSE LOGIC     
-        if((PIND &0b0000100) == 0b00000100){					// initial compare statement to detect button press
-        	mcuTimer(20);										// debounce delay	
-			pauseButton = (pauseButton+1)%2;					// flip button state
-			STATE = 1;											// go to PAUSE state	
+        if((PIND &0b0000100) == 0b00000100){				// initial compare statement to detect button press
+        	mcuTimer(20);						// debounce delay	
+			pauseButton = (pauseButton+1)%2;		// flip button state
+			STATE = 1;					// go to PAUSE state	
             while((PIND &0b00000100) == 0b00000100);			// check to see if button is released
-            mcuTimer(20);										// debounce delay
+            mcuTimer(20);						// debounce delay
 		}
 }
 
@@ -280,32 +280,32 @@ ISR(INT2_vect){
 // function to handle RAMPDOWN condition. let belt run until the linked list is empty, then end the program
 ISR(INT3_vect){
     //RAMP DOWN
-		if((PIND &0b00001000) == 0b00000000){					// initial compare statement to detect button press
-			mcuTimer(20);										// debounce delay	
-			rampTimer();										// use separate timer to let belt run idle before stopping
-			while((PIND &0b00001000) == 0b00001000);			// check to see if button is released
-			mcuTimer(20);										// debounce delay	     
+		if((PIND &0b00001000) == 0b00000000){			// initial compare statement to detect button press
+			mcuTimer(20);					// debounce delay	
+			rampTimer();					// use separate timer to let belt run idle before stopping
+			while((PIND &0b00001000) == 0b00001000);	// check to see if button is released
+			mcuTimer(20);					// debounce delay	     
 		}	  
 }
 
 // ISR5 for Hall effect sensor (HE) built into the turntable PE5, pin 3
 ISR(INT5_vect){
-	STAGE_4_HE_FLAG = 1;					// trigger to indicate turntable HE sensor is in position
+	STAGE_4_HE_FLAG = 1;				// trigger to indicate turntable HE sensor is in position
 }
 // Timer3 interrupt routine for the rampdown delay
 ISR(TIMER3_COMPA_vect){
-    STATE = 4;								// when TIM3 OCR == set value, goes to rampdown state							
+    STATE = 4;						// when TIM3 OCR == set value, goes to rampdown state							
 }
 
 // ADC interrupt for classifying parts
 ISR(ADC_vect){
 	if ((ADC) < ADC_RESULT){
-		ADC_RESULT = ADC;					// maintain the lowest ADC reading for part detection
+		ADC_RESULT = ADC;			// maintain the lowest ADC reading for part detection
 	}
-	if((PIND & 0x02) == 0x02){				// object is in front on ADC sensor
-		ADCSRA |= _BV(ADSC);				// start new ADC measurement		
+	if((PIND & 0x02) == 0x02){			// object is in front on ADC sensor
+		ADCSRA |= _BV(ADSC);			// start new ADC measurement		
 	} else if((PIND & 0x02) == 0x00){		// object is not in front of sensor
-		STATE = 2;							// goto reflective state
+		STATE = 2;				// goto reflective state
 	}
 }
 
@@ -319,36 +319,36 @@ ISR(BADISR_vect){
 
 void generalConfig(){
 	// IO configuration
-	DDRA = 0xFF;													// set all port A pins as output for the stepper motor
-	DDRB = 0xFF;													// set all port B pins as output for DC motor drive
-	DDRC = 0xFF;													// set all port C pins as output, LCD/LED's for debugging
-	DDRD = 0xF0;													// set rightmost 4 pins, PORTD(0,3) as output, rightmost pins (4-7) = input for INT 2 & INT 3
-	DDRE = 0x00;													// set all port E pins as input, for interrupts
-	DDRF = 0x00;													// set all port F pins as inputs, with the ADC using port F for interrupts
-    DDRL = 0xFF;													// use port L to display blinky lights
+	DDRA = 0xFF;			// set all port A pins as output for the stepper motor
+	DDRB = 0xFF;			// set all port B pins as output for DC motor drive
+	DDRC = 0xFF;			// set all port C pins as output, LCD/LED's for debugging
+	DDRD = 0xF0;			// set rightmost 4 pins, PORTD(0,3) as output, rightmost pins (4-7) = input for INT 2 & INT 3
+	DDRE = 0x00;			// set all port E pins as input, for interrupts
+	DDRF = 0x00;			// set all port F pins as inputs, with the ADC using port F for interrupts
+    DDRL = 0xFF;			// use port L to display blinky lights
 		
 	// interrupt configuration
     EIMSK |= _BV(INT0)|_BV(INT1)|_BV(INT2)|_BV(INT3)|_BV(INT5);		// enable interrupts 0-5
-	EICRA |= _BV(ISC01);											// INT0 falling edge
-	EICRA |= (_BV(ISC11)| _BV(ISC10));								// INT1 rising edge
-	EICRA |= (_BV(ISC20) | _BV(ISC21));								// INT2 rising edge
-	EICRA |= _BV(ISC31);											// INT3 falling edge
-	EICRB |= _BV(ISC51);											// INT5 falling edge
+	EICRA |= _BV(ISC01);						// INT0 falling edge
+	EICRA |= (_BV(ISC11)| _BV(ISC10));				// INT1 rising edge
+	EICRA |= (_BV(ISC20) | _BV(ISC21));				// INT2 rising edge
+	EICRA |= _BV(ISC31);						// INT3 falling edge
+	EICRB |= _BV(ISC51);						// INT5 falling edge
 
 	// ADC configuration
-	ADCSRA |= _BV(ADEN);											// enable ADC
-	ADCSRA |= _BV(ADIE);											// enable ADC interrupts
-	ADMUX  |= _BV(REFS0);											// AVcc with external cap at AREF pin, Table 26-3 has more options
-    ADMUX  |= _BV(MUX0);											// select ADC1 channel	  
+	ADCSRA |= _BV(ADEN);			// enable ADC
+	ADCSRA |= _BV(ADIE);			// enable ADC interrupts
+	ADMUX  |= _BV(REFS0);			// AVcc with external cap at AREF pin, Table 26-3 has more options
+    ADMUX  |= _BV(MUX0);			// select ADC1 channel	  
     return;											
 }//end interruptConfig
 
 //PWM configuration
 void pwmConfig(int dutyCycle){
-	TCCR0A |=_BV(WGM01) |_BV(WGM00);								// set timer counter control register A WGM01:0 bit to 1 to enable fast PWM mode
-	TCCR0A |=_BV(COM0A1);											// enable compare output mode for fast PWM to clear output compare OC0A on compare match to set OC0A at bottom (non-inverting)
-    TCCR0B |=_BV(CS01);												// timer counter control register B so that the clock is scaled by clk/64 to moderate the DC motor speed
-	OCR0A = dutyCycle;												// set output compare register to the ADC's result
+	TCCR0A |=_BV(WGM01) |_BV(WGM00);	// set timer counter control register A WGM01:0 bit to 1 to enable fast PWM mode
+	TCCR0A |=_BV(COM0A1);			// enable compare output mode for fast PWM to clear output compare OC0A on compare match to set OC0A at bottom (non-inverting)
+    TCCR0B |=_BV(CS01);				// timer counter control register B so that the clock is scaled by clk/64 to moderate the DC motor speed
+	OCR0A = dutyCycle;			// set output compare register to the ADC's result
     return;   
 }
 
@@ -361,14 +361,14 @@ void DCMotorControl(char beltState){
 void stepperHome(){
 	while (STAGE_4_HE_FLAG == 0 ){
     		//run clockwise routine
-        		stepCounter++;									// increment step counter
+        		stepCounter++;				// increment step counter
         		if(stepCounter > 3){
-            		stepCounter = 0;							// reset array index when it reaches the end
+            		stepCounter = 0;			// reset array index when it reaches the end
         		}//end if
-        		PORTA = stepRotation[stepCounter];				// cycle through the step rotation array
+        		PORTA = stepRotation[stepCounter];	// cycle through the step rotation array
         		milliTimer(200);
 		}//endwhile
-	tablePosition = BLK;										// table is in black position
+	tablePosition = BLK;					// table is in black position
     return;
 }
    
@@ -381,43 +381,43 @@ void stepperHome(){
 		//array of values mapped to an S Curve acceleration over 100 steps (180 degrees)
 		 if (direction ==CCW){
 			 for (int j=0; j< steps-5; j++){
-				 stepCounter++;									// increment step counter
+				 stepCounter++;								// increment step counter
 				 if(stepCounter > 3){
-					 stepCounter = 0;							// reset array index when it reaches the end
+					 stepCounter = 0;						// reset array index when it reaches the end
 				 }//end if			
-				 PORTA = stepRotation[stepCounter];				// cycle through the step rotation array
-				 milliTimer(accProfile100[j]); 					// delay using first 95 steps of S Curve      
+				 PORTA = stepRotation[stepCounter];					// cycle through the step rotation array
+				 milliTimer(accProfile100[j]); 						// delay using first 95 steps of S Curve      
 			 }//close for loop
              
-             DCMotorControl(dcBeltFwd);							// pulse belt long enough to unload part, then finish turntable steps
+             DCMotorControl(dcBeltFwd);						// pulse belt long enough to unload part, then finish turntable steps
              mcuTimer(5);
              DCMotorControl(dcBeltBrake);
 			 
              for (int k=95; k<steps; k++){
-                 stepCounter++;									// increment step counter
+                 stepCounter++;							// increment step counter
                  if(stepCounter > 3){
-                     stepCounter = 0;							// reset array index when it reaches the end
+                     stepCounter = 0;						// reset array index when it reaches the end
                  }//end if
-                 PORTA = stepRotation[stepCounter];			    // cycle through the step rotation array
+                 PORTA = stepRotation[stepCounter];			    	// cycle through the step rotation array
                  milliTimer(accProfile100[k]);					// delay using last 5 steps of S Curve
              }         	                      
 		} else if (direction ==CW){
 			 for (int j=0; j< steps-5; j++){
-				 stepCounter--;									// decrement step counter         
+				 stepCounter--;					// decrement step counter         
 				 if(stepCounter < 0 ){
-					 stepCounter = 3;							// reset array index when it reaches the end
+					 stepCounter = 3;			// reset array index when it reaches the end
 				 } //end if stepcount=0 
-				 PORTA = stepRotation[stepCounter];				// cycle through the step rotation array
-				 milliTimer(accProfile100[j]); 					// delay using first 95 steps of S Curve
+				 PORTA = stepRotation[stepCounter];		// cycle through the step rotation array
+				 milliTimer(accProfile100[j]); 			// delay using first 95 steps of S Curve
 			 }//end for step<j
              
-            DCMotorControl(dcBeltFwd);							// pulse belt long enough to unload part, then finish turntable steps
+            DCMotorControl(dcBeltFwd);						// pulse belt long enough to unload part, then finish turntable steps
             mcuTimer(5);
             DCMotorControl(dcBeltBrake);
             for (int k=95; k< steps; k++){
-                stepCounter--;									// decrement step counter
+                stepCounter--;							// decrement step counter
                 if(stepCounter < 0 ){
-                    stepCounter = 3;							// reset array index when it reaches the end
+                    stepCounter = 3;						// reset array index when it reaches the end
                 } //end if stepcount=0
                 PORTA = stepRotation[stepCounter];				// cycle through the step rotation array
                 milliTimer(accProfile100[k]);					// delay using last 5 steps of S Curve
@@ -428,11 +428,11 @@ void stepperHome(){
 		//array of values mapped to an S Curve acceleration over 50 steps (90 degrees)
 		if (direction ==CCW){ 
 				    for (int j=0; j< steps-5; j++){
-					    stepCounter++;							// increment step counter
+					    stepCounter++;						// increment step counter
 					    if(stepCounter > 3){
 						    stepCounter = 0;					// reset array index when it reaches the end
 					    }//end if			
-					  PORTA = stepRotation[stepCounter];		// cycle through the step rotation array
+					  PORTA = stepRotation[stepCounter];				// cycle through the step rotation array
 					  milliTimer(accProfile50[j]);  
 				    }// end for k
                     
@@ -441,35 +441,35 @@ void stepperHome(){
                     DCMotorControl(dcBeltBrake);
 					
                     for(int k=45; k<steps; k++){
-                        stepCounter++;							// increment step counter
+                        stepCounter++;						// increment step counter
                         if(stepCounter > 3){
                             stepCounter = 0;					// reset array index when it reaches the end
                         }//end if
-                        PORTA = stepRotation[stepCounter];		// cycle through the step rotation array
-                        milliTimer(accProfile50[k]);			// delay using last 5 steps of S Curve
+                        PORTA = stepRotation[stepCounter];			// cycle through the step rotation array
+                        milliTimer(accProfile50[k]);				// delay using last 5 steps of S Curve
                     }// end for k   
 					                               
 		} else if (direction ==CW){
 				//run clockwise routine
 				for (int j=0; j< steps-5; j++){
-					stepCounter--;								// decrement step counter	
+					stepCounter--;				// decrement step counter	
 					if(stepCounter < 0 ){
-						stepCounter = 3;						// reset array index when it reaches the end
+						stepCounter = 3;		// reset array index when it reaches the end
 					} //end if stepcount=0		
-					PORTA = stepRotation[stepCounter];			// cycle through the step rotation array
-					milliTimer(accProfile50[j]);				// delay using first 45 steps of S Curve
+					PORTA = stepRotation[stepCounter];	// cycle through the step rotation array
+					milliTimer(accProfile50[j]);		// delay using first 45 steps of S Curve
 				}//end for step<j
                 
-                 DCMotorControl(dcBeltFwd);						// pulse belt long enough to unload part, then finish turntable steps
+                 DCMotorControl(dcBeltFwd);					// pulse belt long enough to unload part, then finish turntable steps
                  mcuTimer(5);
 				 DCMotorControl(dcBeltBrake);
 				 
                 for (int k=45; k< steps; k++){
-                    stepCounter--;								// decrement step counter
+                    stepCounter--;						// decrement step counter
                     if(stepCounter < 0 ){
-                        stepCounter = 3;						// reset array index when it reaches the end
+                        stepCounter = 3;					// reset array index when it reaches the end
                     } //end if stepcount=0
-                    PORTA = stepRotation[stepCounter];			// cycle through the step rotation array
+                    PORTA = stepRotation[stepCounter];				// cycle through the step rotation array
                     milliTimer(accProfile50[k]);				// delay using last 5 steps of S Curve
                 }//end for step<k              
          }// end 50 steps	 	  
@@ -481,18 +481,18 @@ void stepperHome(){
 void sortStepper(int currentPosition, int desiredPosition){
 	int delta = (desiredPosition - currentPosition);
 	if ((delta == 3) || (delta == -1)){					// if the difference is 90 degrees CCW away
-		sortControl(CCW,50);							// rotate 50 ticks (90 degrees) CCW
+		sortControl(CCW,50);						// rotate 50 ticks (90 degrees) CCW
         rotation = CCW;
-        mcuTimer(80);                                  // time delay for gradual S Curve
-	} else if ((delta == -3 ) || (delta == 1)){			// if the difference is 90 degrees CW away
-		sortControl(CW,50);								// rotate 50 ticks (90 degrees) CW
+        mcuTimer(80);                                  				// time delay for gradual S Curve
+	} else if ((delta == -3 ) || (delta == 1)){				// if the difference is 90 degrees CW away
+		sortControl(CW,50);						// rotate 50 ticks (90 degrees) CW
         rotation = CW;
-        mcuTimer(80);                                  // time delay for gradual S Curve
-	} else if ((delta == -2) || (delta == 2)){			// if the difference is 180 degrees away
-		sortControl(rotation,100);						// rotate 100 ticks (180 degrees) CW
-        mcuTimer(80);                                  // time delay for gradual S Curve
+        mcuTimer(80);                                  				// time delay for gradual S Curve
+	} else if ((delta == -2) || (delta == 2)){				// if the difference is 180 degrees away
+		sortControl(rotation,100);					// rotate 100 ticks (180 degrees) CW
+        mcuTimer(80);                                  				// time delay for gradual S Curve
 	} else {
-		sortControl(CW,0);								// if table is at correct position, stay
+		sortControl(CW,0);						// if table is at correct position, stay
 	}// end if else
 	tablePosition = desiredPosition;					// update delta
 	return;
@@ -524,15 +524,15 @@ int classifyPart(int ADC_RESULT){
 // clock functions
 // timer that delays  for the count in millis
 void mcuTimer(int count){
-	int i=0;							//counting variable
-	TCCR1B |= _BV(CS11);				//clock prescalar by clk/8 = 1MHz
-	TCCR1B |= _BV(WGM12);		        //clear OCR1 on compare match, set output low
-	OCR1A = 0x03E8;				        // write output compare register to hex value of 1000
-	TCNT1 = 0x0000;				        //set the initial timer/counter value to 0	
+	int i=0;						//counting variable
+	TCCR1B |= _BV(CS11);					//clock prescalar by clk/8 = 1MHz
+	TCCR1B |= _BV(WGM12);		        		//clear OCR1 on compare match, set output low
+	OCR1A = 0x03E8;				        	// write output compare register to hex value of 1000
+	TCNT1 = 0x0000;				        	//set the initial timer/counter value to 0	
 	while(i<count){						//loop to check and see if the passed millisecond value is equal to our interrupt flag
-		if ((TIFR1 & 0x02 ) == 0x02){	//*4* time comparison if
-				TIFR1 |= _BV(OCF1A);	//set timer/counter interrupt flag so the interrupt can execute	
-				i++;					//increment
+		if ((TIFR1 & 0x02 ) == 0x02){			//*4* time comparison if
+				TIFR1 |= _BV(OCF1A);		//set timer/counter interrupt flag so the interrupt can execute	
+				i++;				//increment
 		}//*4*end if			
 	}//*2*end while loop comparing out count up case	
 	return; //exit timer function   
@@ -540,27 +540,27 @@ void mcuTimer(int count){
 
 // secondary timer that relies on a separate interrupt status
 void rampTimer(){
-	PORTL=0xFF;							//indicate rampTimer is active
-	TCCR3B |= _BV(WGM32);				//clear OCR3 on compare match, set output low
+	PORTL=0xFF;				//indicate rampTimer is active
+	TCCR3B |= _BV(WGM32);			//clear OCR3 on compare match, set output low
  	TCCR3B |= _BV(CS30) | _BV(CS32);	//clock prescalar by clk/1024 from prescalar, 8MHz/1024 = 7.3kHz
-	OCR3A = 0xFFFF;				        // write output compare register to hex value of 15
-	TCNT3 = 0x0000;				        //set the initial timer/counter value to 0
-	TIMSK3 |=_BV(OCIE3A);				//set timer/counter output compare A match interrupt enable
-	TIFR3 |= _BV(OCF3A);                //set timer/counter flag register = 1 so the flag executes when interrupt flag TCNT1 == OCRA1
+	OCR3A = 0xFFFF;				// write output compare register to hex value of 15
+	TCNT3 = 0x0000;				//set the initial timer/counter value to 0
+	TIMSK3 |=_BV(OCIE3A);			//set timer/counter output compare A match interrupt enable
+	TIFR3 |= _BV(OCF3A);                	//set timer/counter flag register = 1 so the flag executes when interrupt flag TCNT1 == OCRA1
 	return; //exit timer function 
 }//end clock function 1
 
 // third timer downscaled further to allow for smoother operation of the turntable
 void milliTimer(int count){
-	int i=0;							//counting variable
-	TCCR5B |= _BV(CS51);				//clock prescalar by clk/8
+	int i=0;				//counting variable
+	TCCR5B |= _BV(CS51);			//clock prescalar by clk/8
 	TCCR5B |= _BV(WGM52);		        //clear OCR1 on compare match, set output low
-	OCR5A = 0x064;				        // write output compare register to hex value of 100
-	TCNT5 = 0x0000;				        //set the initial timer/counter value to 0	
-	while(i<count){						//loop to check and see if the passed millisecond value is equal to our interrupt flag
+	OCR5A = 0x064;				// write output compare register to hex value of 100
+	TCNT5 = 0x0000;				//set the initial timer/counter value to 0	
+	while(i<count){				//loop to check and see if the passed millisecond value is equal to our interrupt flag
 		if ((TIFR5 & 0x02 ) == 0x02){	//*4* time comparison if
-				TIFR5 |= _BV(OCF5A);	//set timer/counter interrupt flag so the interrupt can execute	
-				i++;					//increment
+			TIFR5 |= _BV(OCF5A);	//set timer/counter interrupt flag so the interrupt can execute	
+			i++;			//increment
 		}//*4*end if			
 	}//*2*end while loop comparing out count up case	
 	return; //exit timer function   
