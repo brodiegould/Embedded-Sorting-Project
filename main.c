@@ -121,7 +121,7 @@ int main(int argc, char *argv[]){
 	pwmConfig(dutyCycle);			// initialize the PWM to the duty cycle set in the global variable declarations
 	sei();					// Global Enable for all interrupts
 	stepperHome();				// get stepper homed at position BLACKPLASTIC
-    DCMotorControl(dcBeltFwd);		    	// start belt in forward direction
+    	DCMotorControl(dcBeltFwd);		    	// start belt in forward direction
     
 		goto POLLING_STAGE;
 
@@ -325,10 +325,10 @@ void generalConfig(){
 	DDRD = 0xF0;			// set rightmost 4 pins, PORTD(0,3) as output, rightmost pins (4-7) = input for INT 2 & INT 3
 	DDRE = 0x00;			// set all port E pins as input, for interrupts
 	DDRF = 0x00;			// set all port F pins as inputs, with the ADC using port F for interrupts
-    DDRL = 0xFF;			// use port L to display blinky lights
+    	DDRL = 0xFF;			// use port L to display blinky lights
 		
 	// interrupt configuration
-    EIMSK |= _BV(INT0)|_BV(INT1)|_BV(INT2)|_BV(INT3)|_BV(INT5);		// enable interrupts 0-5
+   	 EIMSK |= _BV(INT0)|_BV(INT1)|_BV(INT2)|_BV(INT3)|_BV(INT5);	// enable interrupts 0-5
 	EICRA |= _BV(ISC01);						// INT0 falling edge
 	EICRA |= (_BV(ISC11)| _BV(ISC10));				// INT1 rising edge
 	EICRA |= (_BV(ISC20) | _BV(ISC21));				// INT2 rising edge
@@ -339,7 +339,7 @@ void generalConfig(){
 	ADCSRA |= _BV(ADEN);			// enable ADC
 	ADCSRA |= _BV(ADIE);			// enable ADC interrupts
 	ADMUX  |= _BV(REFS0);			// AVcc with external cap at AREF pin, Table 26-3 has more options
-    ADMUX  |= _BV(MUX0);			// select ADC1 channel	  
+    	ADMUX  |= _BV(MUX0);			// select ADC1 channel	  
     return;											
 }//end interruptConfig
 
@@ -400,7 +400,7 @@ void stepperHome(){
                  }//end if
                  PORTA = stepRotation[stepCounter];			    	// cycle through the step rotation array
                  milliTimer(accProfile100[k]);					// delay using last 5 steps of S Curve
-             }         	                      
+             }//end for         	                      
 		} else if (direction ==CW){
 			 for (int j=0; j< steps-5; j++){
 				 stepCounter--;					// decrement step counter         
@@ -427,13 +427,13 @@ void stepperHome(){
 	  } else if (steps ==50){									// elseif a 90 degree turn is needed
 		//array of values mapped to an S Curve acceleration over 50 steps (90 degrees)
 		if (direction ==CCW){ 
-				    for (int j=0; j< steps-5; j++){
-					    stepCounter++;						// increment step counter
-					    if(stepCounter > 3){
-						    stepCounter = 0;					// reset array index when it reaches the end
+			for (int j=0; j< steps-5; j++){
+				 stepCounter++;						// increment step counter
+				 if(stepCounter > 3){
+				 stepCounter = 0;					// reset array index when it reaches the end
 					    }//end if			
-					  PORTA = stepRotation[stepCounter];				// cycle through the step rotation array
-					  milliTimer(accProfile50[j]);  
+					 PORTA = stepRotation[stepCounter];				// cycle through the step rotation array
+					 milliTimer(accProfile50[j]);  
 				    }// end for k
                     
                     DCMotorControl(dcBeltFwd);					// pulse belt long enough to unload part, then finish turntable steps
@@ -462,7 +462,7 @@ void stepperHome(){
                 
                  DCMotorControl(dcBeltFwd);					// pulse belt long enough to unload part, then finish turntable steps
                  mcuTimer(5);
-				 DCMotorControl(dcBeltBrake);
+		 DCMotorControl(dcBeltBrake);
 				 
                 for (int k=45; k< steps; k++){
                     stepCounter--;						// decrement step counter
