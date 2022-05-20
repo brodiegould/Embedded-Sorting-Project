@@ -1,6 +1,6 @@
 # Embedded-Sorting-Project
 MECH458 final project that classifies parts and sorts them, done in C
- ** Add overview of the function of the project
+See main.c for the majority of the program
  
  Test Runtimes:
  34 seconds 0 errors
