@@ -1,7 +1,6 @@
 /* ##################################################################
 # PROJECT: Final Project
-# NAME 1: Brodie Gould, V00973591
-# NAME 2: Nick Gee, V00862631
+# NAME 1: Brodie Gould
 # DESC: *add description*
 # STARTED March 15th, 2022############################################ */
 
